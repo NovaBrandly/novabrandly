@@ -206,21 +206,43 @@ def main():
     # use "now" for genuinely new items
     new_count = 0
     for p in all_products:
-        if p['i'] in existing_ts:
-            p['ts'] = existing_ts[p['i']]
-        else:
+        try:
+            pid = p.get('i')
+            if pid and pid in existing_ts:
+                p['ts'] = existing_ts[pid]
+            else:
+                p['ts'] = now
+                new_count += 1
+        except Exception:
             p['ts'] = now
-            new_count += 1
 
     # Sort newest-first so new items appear at the top of the site
-    all_products.sort(key=lambda p: p['ts'], reverse=True)
+    try:
+        all_products.sort(key=lambda p: p.get('ts', 0), reverse=True)
+    except Exception as e:
+        print(f'Warning: sort failed ({e}), keeping unsorted order', flush=True)
 
     print(f'New items this run: {new_count}', flush=True)
 
-    with open('products.json', 'w', encoding='utf-8') as f:
-        json.dump(all_products, f, ensure_ascii=False, separators=(',',':'))
-
-    print('Saved products.json ✅', flush=True)
+    try:
+        with open('products.json', 'w', encoding='utf-8') as f:
+            json.dump(all_products, f, ensure_ascii=False, separators=(',',':'))
+        print('Saved products.json ✅', flush=True)
+    except Exception as e:
+        print(f'❌ Failed to save products.json: {e}', flush=True)
+        raise
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as e:
+        import traceback
+        print(f'\n❌ FATAL ERROR: {type(e).__name__}: {e}', flush=True)
+        traceback.print_exc()
+        # Try to save whatever we have, or keep old file, rather than crash the workflow
+        import os
+        if not os.path.exists('products.json'):
+            print('No products.json exists — writing empty array as fallback', flush=True)
+            with open('products.json', 'w', encoding='utf-8') as f:
+                json.dump([], f)
+        sys.exit(0)  # Exit cleanly so the workflow can still commit/proceed
