@@ -169,17 +169,27 @@ def main():
     existing_ts = load_existing()
     now = int(time.time())
 
-    headers = {
-        'Content-Type':  'application/x-www-form-urlencoded',
-        'x-wg-language': 'en',
-        'x-wg-module':   'indsite',
-        'wego-staging':  '0',
-        'Accept':        'application/json',
-        'Cookie':        f'token={TOKEN}',
-        'User-Agent':    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Origin':        BASE,
-        'Referer':       f'{BASE}/weshop/store/{ALBUM}',
-    }
+    def make_headers(cat_id):
+        # Fully match a real browser request (including the category-specific Referer)
+        return {
+            'Content-Type':   'application/x-www-form-urlencoded',
+            'Accept':         'application/json, text/plain, */*',
+            'Accept-Language':'en,ru-RU;q=0.9,ru;q=0.8,en-US;q=0.7',
+            'Connection':     'keep-alive',
+            'Cookie':         f'token={TOKEN}',
+            'Origin':         BASE,
+            'Referer':        f'{BASE}/weshop/goods_list/{ALBUM}?groupId={cat_id}',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-origin',
+            'User-Agent':     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36',
+            'sec-ch-ua':          '"Chromium";v="148", "Google Chrome";v="148", "Not/A)Brand";v="99"',
+            'sec-ch-ua-mobile':   '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'wego-staging':   '0',
+            'x-wg-language':  'en',
+            'x-wg-module':    'indsite',
+        }
 
     print('Starting catalog fetch...', flush=True)
     all_products, seen = [], set()
@@ -191,7 +201,8 @@ def main():
         if remaining < 20:
             print(f'\n⏱ Global time budget nearly exhausted ({elapsed:.0f}s elapsed), skipping remaining categories', flush=True)
             break
-        prods = fetch_category(cat_id, cat_name, headers, seen, time_limit=min(CATEGORY_TIME_LIMIT, remaining))
+        cat_headers = make_headers(cat_id)
+        prods = fetch_category(cat_id, cat_name, cat_headers, seen, time_limit=min(CATEGORY_TIME_LIMIT, remaining))
         all_products.extend(prods)
 
     print(f'\nTotal: {len(all_products)} products in {time.time()-run_start:.1f}s', flush=True)
