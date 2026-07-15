@@ -1,0 +1,153 @@
+#!/usr/bin/env python3
+"""
+Nova Brandly — Supplier Catalog Fetcher
+Run by GitHub Actions every 6 hours.
+Fetches ALL products from supplier and saves products.json
+"""
+
+import json, os, re, time, sys
+import urllib.request, urllib.parse
+
+TOKEN    = os.environ.get('SUPPLIER_TOKEN', '')
+BASE     = 'https://www.5270527.xyz'
+ALBUM    = '_ZC8qfT_u4BkOnvDjx3c7FjRykKm4t18k'
+
+CATS = [
+    ('84646720', 'Bags'),
+    ('84646717', 'Bags'),
+    ('84646715', 'Bags'),
+    ('84678648', 'Wallets'),
+    ('84678702', 'Shoes'),
+    ('84678506', 'Clothing'),
+    ('84678726', 'Belts'),
+    ('84678751', 'Jewelry'),
+    ('84678809', 'Scarves & Hats'),
+]
+
+BRANDS = {
+    'lv':'Louis Vuitton','louis':'Louis Vuitton','gucci':'Gucci','gucc':'Gucci',
+    'miumiu':'Miu Miu','miu':'Miu Miu','ggdb':'Golden Goose','golden':'Golden Goose',
+    'ysl':'YSL','saint':'YSL','chrome':'Chrome Hearts','dior':'Dior','fendi':'Fendi',
+    'prada':'Prada','hermes':'Hermès','hermès':'Hermès','balenciaga':'Balenciaga',
+    'burberry':'Burberry','chanel':'Chanel','celine':'Celine','loewe':'Loewe',
+    'bottega':'Bottega Veneta','bv':'Bottega Veneta','coach':'Coach','versace':'Versace',
+    'valentino':'Valentino','givenchy':'Givenchy','jacquemus':'Jacquemus','amiri':'AMIRI',
+    'cartier':'Cartier','bulgari':'Bulgari','tiffany':'Tiffany & Co','van':'Van Cleef',
+    'longchamp':'Longchamp','goyard':'Goyard','furla':'Furla','tory':'Tory Burch',
+    'michael':'Michael Kors','marc':'Marc Jacobs','moncler':'Moncler','ralph':'Ralph Lauren',
+    'polo':'Ralph Lauren','tom':'Tom Ford','jimmy':'Jimmy Choo','ferragamo':'Ferragamo',
+    'ugg':'UGG','chopard':'Chopard','ami':'AMI Paris','dolce':'Dolce & Gabbana',
+    'd&g':'Dolce & Gabbana','armani':'Armani','new':'New Balance','alo':'Alo Yoga',
+    'canada':'Canada Goose','adidas':'Adidas','lacoste':'Lacoste','lululemon':'Lululemon',
+    'off':'Off-White','rolex':'Rolex','omega':'Omega','swarovski':'Swarovski',
+    'alexander':'Alexander McQueen','skims':'SKIMS','messika':'Messika','pinko':'Pinko',
+    'schiaparelli':'Schiaparelli','mcm':'MCM','stone':'Stone Island','loro':'Loro Piana',
+    'max':'Max Mara','acne':'Acne Studios','maison':'Maison Margiela','thom':'Thom Browne',
+    'gianvito':'Gianvito Rossi','manolo':'Manolo Blahnik','roger':'Roger Vivier',
+    'patek':'Patek Philippe','zimmermann':'Zimmermann','vetements':'Vetements',
+}
+
+def norm_brand(raw):
+    k = re.sub(r'[^a-zA-Z&]', '', raw).strip().lower()
+    return BRANDS.get(k, raw.strip().capitalize() if raw.strip() else 'Unknown')
+
+def parse_code(line):
+    m = re.match(r'^([A-Z0-9]{1,4}?)(\d{2,3})$', line.strip())
+    if not m: return None
+    pc = int(m.group(2))
+    return m.group(1), pc * 2 + 10   # quality, price
+
+def fetch_page(cat_id, ts, headers):
+    url = f'{BASE}/album/personal/all?albumId={ALBUM}&tagGroupId={cat_id}&transLang=en&tagUnion=false'
+    if ts:
+        url += f'&pageTimestamp={ts}'
+    data = b'tagList=%5B%5D'
+    req = urllib.request.Request(url, data=data, headers=headers, method='POST')
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return json.loads(resp.read().decode())
+
+def fetch_category(cat_id, cat_name, headers, seen):
+    prods, ts, page = [], '', 0
+    print(f'  Fetching {cat_name} ({cat_id})...', flush=True)
+    while True:
+        try:
+            data = fetch_page(cat_id, ts, headers)
+            result = data.get('result', {})
+            items = result.get('items', [])
+            if not items:
+                break
+            for item in items:
+                gid = item.get('goods_id', '')
+                if gid in seen:
+                    continue
+                seen.add(gid)
+                lines = [l.strip() for l in item.get('title','').split('\n') if l.strip()]
+                if not lines:
+                    continue
+                parsed = parse_code(lines[0])
+                if not parsed:
+                    continue
+                quality, price = parsed
+                name_line = lines[1] if len(lines) > 1 else lines[0]
+                brand_raw = name_line.split(' ')[0]
+                brand = norm_brand(brand_raw)
+                desc = ' · '.join(l for l in lines[2:4] if not l.startswith('#'))
+                imgs = [u.split('?')[0] for u in item.get('imgs', []) if u.startswith('http')]
+                if not imgs:
+                    continue
+                prods.append({
+                    'i':   f'sup_{gid}',
+                    'n':   name_line,
+                    'b':   brand,
+                    'c':   cat_name,
+                    'p':   price,
+                    'q':   quality,
+                    'd':   desc,
+                    'img': imgs[0],
+                    'src': 'sup',
+                })
+            pag = result.get('pagination', {})
+            if not pag.get('isLoadMore', False):
+                break
+            ts = pag['pageTimestamp']
+            page += 1
+            time.sleep(0.08)
+        except Exception as e:
+            print(f'    Error on page {page}: {e}', flush=True)
+            break
+    print(f'    → {len(prods)} products', flush=True)
+    return prods
+
+def main():
+    if not TOKEN:
+        print('ERROR: SUPPLIER_TOKEN not set!')
+        sys.exit(1)
+
+    headers = {
+        'Content-Type':  'application/x-www-form-urlencoded',
+        'x-wg-language': 'en',
+        'x-wg-module':   'indsite',
+        'wego-staging':  '0',
+        'Accept':        'application/json',
+        'Cookie':        f'token={TOKEN}',
+        'User-Agent':    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Origin':        BASE,
+        'Referer':       f'{BASE}/weshop/store/{ALBUM}',
+    }
+
+    print('Starting catalog fetch...', flush=True)
+    all_products, seen = [], set()
+
+    for cat_id, cat_name in CATS:
+        prods = fetch_category(cat_id, cat_name, headers, seen)
+        all_products.extend(prods)
+
+    print(f'\nTotal: {len(all_products)} products', flush=True)
+
+    with open('products.json', 'w', encoding='utf-8') as f:
+        json.dump(all_products, f, ensure_ascii=False, separators=(',',':'))
+
+    print('Saved products.json ✅', flush=True)
+
+if __name__ == '__main__':
+    main()
