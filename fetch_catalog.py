@@ -66,29 +66,33 @@ def fetch_page(cat_id, ts, headers):
     with urllib.request.urlopen(req, timeout=30) as resp:
         return json.loads(resp.read().decode())
 
-MAX_PAGES_PER_CAT = 150     # hard safety cap (150 * 32 = 4800 per category max)
-MAX_STUCK_PAGES   = 5       # if 0 new items N times in a row, stop (raised from 3)
-CATEGORY_TIME_LIMIT = 130   # seconds max per category (9 cats * 130s = ~20min worst case,
-                             # but real runs finish much faster since most cats are smaller)
+MAX_CALLS_PER_CAT = 40      # repeated "page 0" calls per category (not true pagination)
+MAX_STUCK_CALLS   = 8       # stop a category after N consecutive calls with 0 new items
+CATEGORY_TIME_LIMIT = 130   # seconds max per category
 
 def fetch_category(cat_id, cat_name, headers, seen, time_limit=CATEGORY_TIME_LIMIT):
-    prods, ts, page = [], '', 0
+    """
+    NOTE: This supplier's pageTimestamp-based pagination does not reliably advance
+    (page 1 with a pageTimestamp often returns the same items as page 0). The only
+    approach that has proven to work is calling the base "page 0" endpoint repeatedly —
+    each call appears to return a refreshed/rotating sample of items from the category,
+    so repeated calls accumulate new unique items over time even without a real cursor.
+    """
+    prods = []
     stuck_count = 0
-    last_ts = None
     start_time = time.time()
     print(f'  Fetching {cat_name} ({cat_id})...', flush=True)
 
-    while page < MAX_PAGES_PER_CAT:
-        # Hard time limit per category
+    for call_n in range(MAX_CALLS_PER_CAT):
         if time.time() - start_time > time_limit:
             print(f'    ⏱ Time limit reached for {cat_name}, moving on', flush=True)
             break
         try:
-            data = fetch_page(cat_id, ts, headers)
+            data = fetch_page(cat_id, '', headers)  # always page 0, no ts
             result = data.get('result', {})
             items = result.get('items', [])
             if not items:
-                print(f'    Page {page}: no items, stopping', flush=True)
+                print(f'    Call {call_n}: no items, stopping', flush=True)
                 break
 
             new_count = 0
@@ -124,33 +128,25 @@ def fetch_category(cat_id, cat_name, headers, seen, time_limit=CATEGORY_TIME_LIM
                     'src': 'sup',
                 })
 
-            print(f'    Page {page}: {len(items)} items, {new_count} new (total so far: {len(prods)})', flush=True)
-            # Note: NOT stopping on 0-new-items streaks — the supplier API legitimately
-            # returns long runs of duplicate items between genuinely new ones.
-            # We rely on isLoadMore=false / pageTimestamp-stall / hard caps instead.
+            print(f'    Call {call_n}: {len(items)} items, {new_count} new (total so far: {len(prods)})', flush=True)
 
-            pag = result.get('pagination', {})
-            if not pag.get('isLoadMore', False):
-                print(f'    isLoadMore=false, stopping normally', flush=True)
-                break
+            if new_count == 0:
+                stuck_count += 1
+                if stuck_count >= MAX_STUCK_CALLS:
+                    print(f'    {MAX_STUCK_CALLS} calls with 0 new items — category exhausted', flush=True)
+                    break
+            else:
+                stuck_count = 0
 
-            new_ts = pag.get('pageTimestamp')
-            # Detect stuck: pageTimestamp not advancing
-            if new_ts == last_ts:
-                print(f'    ⚠ pageTimestamp not advancing, stopping', flush=True)
-                break
-            last_ts = new_ts
-            ts = new_ts
-            page += 1
-            time.sleep(0.1)
+            time.sleep(0.6)  # brief pause between repeated calls
         except Exception as e:
-            print(f'    Error on page {page}: {e}', flush=True)
-            break
+            print(f'    Error on call {call_n}: {e}', flush=True)
+            time.sleep(1)
 
-    print(f'    → {cat_name}: {len(prods)} products in {page+1} pages, {time.time()-start_time:.1f}s', flush=True)
+    print(f'    → {cat_name}: {len(prods)} products from {call_n+1} calls, {time.time()-start_time:.1f}s', flush=True)
     return prods
 
-GLOBAL_TIME_BUDGET = 780  # 13 minutes total (leaves buffer under 15min workflow timeout)
+GLOBAL_TIME_BUDGET = 960  # 16 minutes total (leaves buffer under 18min workflow timeout)
 
 def load_existing():
     '''Load previous products.json to preserve first-seen timestamps'''
