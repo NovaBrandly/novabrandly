@@ -66,11 +66,12 @@ def fetch_page(cat_id, ts, headers):
     with urllib.request.urlopen(req, timeout=30) as resp:
         return json.loads(resp.read().decode())
 
-MAX_PAGES_PER_CAT = 60      # hard safety cap
-MAX_STUCK_PAGES   = 3       # if pageTimestamp repeats or 0 new items N times in a row, stop
-CATEGORY_TIME_LIMIT = 90    # seconds max per category
+MAX_PAGES_PER_CAT = 150     # hard safety cap (150 * 32 = 4800 per category max)
+MAX_STUCK_PAGES   = 5       # if 0 new items N times in a row, stop (raised from 3)
+CATEGORY_TIME_LIMIT = 130   # seconds max per category (9 cats * 130s = ~20min worst case,
+                             # but real runs finish much faster since most cats are smaller)
 
-def fetch_category(cat_id, cat_name, headers, seen):
+def fetch_category(cat_id, cat_name, headers, seen, time_limit=CATEGORY_TIME_LIMIT):
     prods, ts, page = [], '', 0
     stuck_count = 0
     last_ts = None
@@ -79,7 +80,7 @@ def fetch_category(cat_id, cat_name, headers, seen):
 
     while page < MAX_PAGES_PER_CAT:
         # Hard time limit per category
-        if time.time() - start_time > CATEGORY_TIME_LIMIT:
+        if time.time() - start_time > time_limit:
             print(f'    ⏱ Time limit reached for {cat_name}, moving on', flush=True)
             break
         try:
@@ -155,10 +156,24 @@ def fetch_category(cat_id, cat_name, headers, seen):
     print(f'    → {cat_name}: {len(prods)} products in {page+1} pages, {time.time()-start_time:.1f}s', flush=True)
     return prods
 
+GLOBAL_TIME_BUDGET = 780  # 13 minutes total (leaves buffer under 15min workflow timeout)
+
+def load_existing():
+    '''Load previous products.json to preserve first-seen timestamps'''
+    try:
+        with open('products.json', 'r', encoding='utf-8') as f:
+            existing = json.load(f)
+        return {p['i']: p.get('ts', 0) for p in existing}
+    except Exception:
+        return {}
+
 def main():
     if not TOKEN:
         print('ERROR: SUPPLIER_TOKEN not set!')
         sys.exit(1)
+
+    existing_ts = load_existing()
+    now = int(time.time())
 
     headers = {
         'Content-Type':  'application/x-www-form-urlencoded',
@@ -174,12 +189,33 @@ def main():
 
     print('Starting catalog fetch...', flush=True)
     all_products, seen = [], set()
+    run_start = time.time()
 
     for cat_id, cat_name in CATS:
-        prods = fetch_category(cat_id, cat_name, headers, seen)
+        elapsed = time.time() - run_start
+        remaining = GLOBAL_TIME_BUDGET - elapsed
+        if remaining < 20:
+            print(f'\n⏱ Global time budget nearly exhausted ({elapsed:.0f}s elapsed), skipping remaining categories', flush=True)
+            break
+        prods = fetch_category(cat_id, cat_name, headers, seen, time_limit=min(CATEGORY_TIME_LIMIT, remaining))
         all_products.extend(prods)
 
-    print(f'\nTotal: {len(all_products)} products', flush=True)
+    print(f'\nTotal: {len(all_products)} products in {time.time()-run_start:.1f}s', flush=True)
+
+    # Assign timestamps: keep original first-seen time for existing items,
+    # use "now" for genuinely new items
+    new_count = 0
+    for p in all_products:
+        if p['i'] in existing_ts:
+            p['ts'] = existing_ts[p['i']]
+        else:
+            p['ts'] = now
+            new_count += 1
+
+    # Sort newest-first so new items appear at the top of the site
+    all_products.sort(key=lambda p: p['ts'], reverse=True)
+
+    print(f'New items this run: {new_count}', flush=True)
 
     with open('products.json', 'w', encoding='utf-8') as f:
         json.dump(all_products, f, ensure_ascii=False, separators=(',',':'))
