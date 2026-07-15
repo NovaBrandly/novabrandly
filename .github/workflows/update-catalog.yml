@@ -2,15 +2,21 @@ name: Update Supplier Catalog
 
 on:
   schedule:
-    - cron: '0 */6 * * *'   # Every 6 hours automatically
-  workflow_dispatch:          # Manual trigger from GitHub UI
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Fetch supplier catalog
         env:
