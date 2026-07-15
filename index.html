@@ -27,9 +27,6 @@ header{position:sticky;top:0;z-index:200;background:rgba(11,11,11,.97);backdrop-
 .hdr-right{display:flex;align-items:center;gap:1rem;margin-left:auto}
 .cnt-lbl{font-size:.68rem;letter-spacing:.1em;color:var(--muted);white-space:nowrap}
 .cnt-lbl b{color:var(--gold)}
-.live-wrap{display:flex;align-items:center;gap:5px;font-size:.65rem;letter-spacing:.12em;color:var(--gold);text-transform:uppercase}
-.live-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);animation:pulse 2s ease infinite}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
 .order-btn{background:var(--gold);color:#0b0b0b;padding:8px 18px;font-family:'Jost',sans-serif;font-size:.7rem;font-weight:500;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;transition:background .15s;white-space:nowrap}
 .order-btn:hover{background:var(--gold2)}
 .hero{padding:3.5rem 2.5rem 2.5rem;border-bottom:1px solid var(--border)}
@@ -40,20 +37,13 @@ header{position:sticky;top:0;z-index:200;background:rgba(11,11,11,.97);backdrop-
 .hero-stats{display:flex;gap:2.5rem;margin-top:1.4rem;flex-wrap:wrap}
 .stat-n{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;color:var(--gold2);display:block}
 .stat-l{font-size:.6rem;letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
-/* FILTERS */
 .filters{position:sticky;top:68px;z-index:100;background:rgba(11,11,11,.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:.9rem 2.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
 .fgroup{display:flex;align-items:center;gap:.6rem}
 .flbl{font-size:.58rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;white-space:nowrap}
-/* Quality pills */
 .qpills{display:flex;gap:4px;flex-wrap:wrap}
 .qpill{background:transparent;border:1px solid var(--border);padding:5px 13px;font-size:.7rem;letter-spacing:.07em;color:var(--muted);cursor:pointer;font-family:'Jost',sans-serif;transition:all .15s;white-space:nowrap}
 .qpill:hover{border-color:var(--gold);color:var(--gold2)}
-.qpill.on{font-weight:500}
-.qpill[data-q="all"].on{background:var(--gold);border-color:var(--gold);color:#0b0b0b}
-.qpill[data-q="TQ"].on{background:#d4af37;border-color:#d4af37;color:#0b0b0b}
-.qpill[data-q="3A"].on{background:var(--gold);border-color:var(--gold);color:#0b0b0b}
-.qpill[data-q="OQ"].on{background:#7a7060;border-color:#7a7060;color:#f0ece4}
-/* Dropdowns */
+.qpill.on{background:var(--gold);border-color:var(--gold);color:#0b0b0b;font-weight:500}
 .dd-wrap{position:relative}
 .dd-btn{display:flex;align-items:center;gap:8px;background:transparent;border:1px solid var(--border);padding:5px 12px;font-size:.72rem;letter-spacing:.07em;color:var(--muted);cursor:pointer;font-family:'Jost',sans-serif;min-width:140px;justify-content:space-between;transition:all .15s}
 .dd-btn:hover,.dd-btn.open{border-color:var(--gold);color:var(--gold2)}
@@ -74,14 +64,12 @@ header{position:sticky;top:0;z-index:200;background:rgba(11,11,11,.97);backdrop-
 .dd-foot:hover{color:var(--gold)}
 .srtsel{background:transparent;border:1px solid var(--border);padding:5px 12px;font-size:.72rem;letter-spacing:.07em;color:var(--muted);font-family:'Jost',sans-serif;outline:none;cursor:pointer;min-width:160px}
 .srtsel:hover{border-color:var(--gold);color:var(--gold2)}
-/* GRID */
 .wrap{padding:2rem 2.5rem 5rem}
 .loading-msg{text-align:center;padding:5rem 1rem;font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--muted);font-style:italic}
 .loading-msg.hide{display:none}
 .nores{text-align:center;padding:4rem 1rem;font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--muted);font-style:italic;display:none}
 .nores.show{display:block}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:2px}
-/* CARD */
 .card{background:var(--card);cursor:pointer;position:relative;overflow:hidden;animation:fadeup .4s ease both}
 @keyframes fadeup{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 .card-img{aspect-ratio:1/1;overflow:hidden;background:var(--bg3);position:relative}
@@ -92,33 +80,27 @@ header{position:sticky;top:0;z-index:200;background:rgba(11,11,11,.97);backdrop-
 .card-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(8,7,4,.82) 0%,transparent 55%);opacity:0;transition:opacity .28s;display:flex;align-items:flex-end;padding:1rem}
 .card:hover .card-ov{opacity:1}
 .ov-btn{background:var(--gold);color:#0b0b0b;border:none;padding:8px 0;font-family:'Jost',sans-serif;font-size:.65rem;font-weight:500;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;width:100%}
-/* Quality badge */
-.qbadge{position:absolute;top:8px;right:8px;font-size:.6rem;font-weight:600;letter-spacing:.1em;padding:3px 8px;z-index:2}
-.qb-TQ,.qb-TQ2,.qb-TQ3{background:#d4af37;color:#0b0b0b}
-.qb-3A{background:var(--gold);color:#0b0b0b}
-.qb-OQ{background:#7a7060;color:#f0ece4}
+.qbadge{position:absolute;top:8px;right:8px;font-size:.6rem;font-weight:600;letter-spacing:.1em;padding:3px 8px;z-index:2;background:#d4af37;color:#0b0b0b}
 .card-body{padding:.8rem .9rem .9rem;border-top:1px solid var(--border)}
 .card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.22rem}
 .card-brand{font-size:.58rem;letter-spacing:.17em;color:var(--gold);text-transform:uppercase;font-weight:500}
 .card-cat{font-size:.54rem;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
 .card-name{font-family:'Cormorant Garamond',serif;font-size:.95rem;line-height:1.25;margin-bottom:.25rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--text)}
 .card-desc{font-size:.66rem;color:var(--muted2);line-height:1.5;margin-bottom:.55rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.card-price{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--text);letter-spacing:.03em}
+.card-price{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--text)}
 .card-price .qc{color:var(--gold);font-size:.85em}
-/* MODAL */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:900;display:flex;align-items:center;justify-content:center;padding:1.5rem;opacity:0;pointer-events:none;transition:opacity .28s}
 .modal-bg.open{opacity:1;pointer-events:all}
 .modal{background:var(--bg2);border:1px solid var(--border);max-width:860px;width:100%;max-height:92vh;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;position:relative;transform:translateY(28px) scale(.98);transition:transform .3s}
 .modal-bg.open .modal{transform:none}
-.m-img-wrap{overflow:hidden;background:var(--bg3);position:relative}
+.m-img-wrap{overflow:hidden;background:var(--bg3)}
 .m-img-wrap img{width:100%;height:100%;object-fit:cover;display:block}
-.m-qb{position:absolute;top:12px;right:12px;font-size:.7rem;font-weight:600;letter-spacing:.12em;padding:4px 12px}
 .m-close{position:absolute;top:12px;left:12px;z-index:10;background:rgba(11,11,11,.8);border:1px solid var(--border);color:var(--muted2);width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.9rem;transition:all .15s}
 .m-close:hover{color:var(--text);border-color:var(--gold)}
 .m-body{padding:2rem 1.8rem;display:flex;flex-direction:column;gap:.5rem}
 .m-brand{font-size:.65rem;letter-spacing:.24em;color:var(--gold);text-transform:uppercase}
 .m-name{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;line-height:1.15}
-.m-price{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:600;color:var(--text);padding-bottom:1.1rem;border-bottom:1px solid var(--border)}
+.m-price{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:600;color:var(--text);padding-bottom:1rem;border-bottom:1px solid var(--border)}
 .m-price .qc{color:var(--gold);font-size:.8em}
 .m-desc{font-size:.82rem;color:var(--muted2);line-height:1.8;flex:1}
 .m-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:.3rem}
@@ -130,13 +112,9 @@ footer{border-top:1px solid var(--border);padding:2rem 2.5rem;display:flex;justi
 .ft-logo{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:1.1rem;letter-spacing:.4em;color:var(--gold);text-transform:uppercase}
 .ft-logo span{color:var(--text)}
 footer p{font-size:.68rem;color:var(--muted)}
-/* Update notification */
-.upd-toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--bg2);border:1px solid var(--gold);padding:.8rem 1.2rem;font-size:.72rem;color:var(--gold2);display:none;align-items:center;gap:10px;z-index:800}
-.upd-toast.show{display:flex}
-.upd-toast button{background:var(--gold);color:#0b0b0b;border:none;padding:4px 12px;font-family:'Jost',sans-serif;font-size:.65rem;cursor:pointer;font-weight:500}
 @media(max-width:768px){
 header{padding:0 1.2rem;gap:.8rem;height:60px}
-.cnt-lbl,.live-wrap{display:none}
+.cnt-lbl{display:none}
 .filters{padding:.8rem 1.2rem;top:60px;gap:.5rem}
 .hero{padding:2rem 1.2rem 1.5rem}
 .wrap{padding:1.2rem 1.2rem 4rem}
@@ -149,7 +127,6 @@ footer{padding:1.5rem 1.2rem;flex-direction:column;align-items:flex-start}
 </head>
 <body>
 <div id="loader"><div class="loader-logo">Nova Brandly</div><div class="loader-bar"></div></div>
-
 <header>
   <a class="logo" href="#">NOVA <span>BRANDLY</span></a>
   <div class="srch-wrap">
@@ -158,7 +135,6 @@ footer{padding:1.5rem 1.2rem;flex-direction:column;align-items:flex-start}
   </div>
   <div class="hdr-right">
     <div class="cnt-lbl">Showing <b id="cnt">0</b> items</div>
-    <div class="live-wrap"><span class="live-dot"></span>Live</div>
     <a class="order-btn" href="https://t.me/nataljakorr" target="_blank">Order →</a>
   </div>
 </header>
@@ -174,38 +150,26 @@ footer{padding:1.5rem 1.2rem;flex-direction:column;align-items:flex-start}
 </section>
 
 <div class="filters">
-  <!-- Quality -->
   <div class="fgroup"><span class="flbl">Quality</span>
     <div class="qpills">
-      <button class="qpill on" data-q="all"  onclick="setQ('all')">All</button>
-      <button class="qpill"    data-q="TQ"   onclick="setQ('TQ')">★ Top Quality</button>
-      <button class="qpill"    data-q="3A"   onclick="setQ('3A')">3A</button>
-      <button class="qpill"    data-q="OQ"   onclick="setQ('OQ')">OQ</button>
+      <button class="qpill on" data-q="all" onclick="setQ('all')">All</button>
+      <button class="qpill" data-q="TQ"  onclick="setQ('TQ')">★ Top Quality</button>
+      <button class="qpill" data-q="3A"  onclick="setQ('3A')">3A</button>
+      <button class="qpill" data-q="OQ"  onclick="setQ('OQ')">OQ</button>
     </div>
   </div>
-  <!-- Category -->
   <div class="fgroup"><span class="flbl">Category</span>
     <div class="dd-wrap">
       <button class="dd-btn" id="catBtn"><span class="dd-lbl">All</span><span class="dd-arrow">▼</span></button>
-      <div class="dd-panel" id="catPanel">
-        <input class="dd-srch" type="text" placeholder="Search…">
-        <div class="dd-opts" id="catOpts"></div>
-        <div class="dd-foot">Clear</div>
-      </div>
+      <div class="dd-panel" id="catPanel"><input class="dd-srch" type="text" placeholder="Search…"><div class="dd-opts" id="catOpts"></div><div class="dd-foot">Clear</div></div>
     </div>
   </div>
-  <!-- Brand -->
   <div class="fgroup"><span class="flbl">Brand</span>
     <div class="dd-wrap">
       <button class="dd-btn" id="brandBtn"><span class="dd-lbl">All</span><span class="dd-arrow">▼</span></button>
-      <div class="dd-panel" id="brandPanel">
-        <input class="dd-srch" type="text" placeholder="Search…">
-        <div class="dd-opts" id="brandOpts"></div>
-        <div class="dd-foot">Clear</div>
-      </div>
+      <div class="dd-panel" id="brandPanel"><input class="dd-srch" type="text" placeholder="Search…"><div class="dd-opts" id="brandOpts"></div><div class="dd-foot">Clear</div></div>
     </div>
   </div>
-  <!-- Sort -->
   <div class="fgroup"><span class="flbl">Sort</span>
     <select class="srtsel" id="srt" onchange="render()">
       <option value="def">Default</option>
@@ -223,14 +187,10 @@ footer{padding:1.5rem 1.2rem;flex-direction:column;align-items:flex-start}
   <div id="sentinel" style="height:1px"></div>
 </div>
 
-<!-- Modal -->
 <div class="modal-bg" id="mbg" onclick="closeBg(event)">
   <div class="modal">
     <button class="m-close" onclick="closeM()">✕</button>
-    <div class="m-img-wrap">
-      <img id="mImg" src="" alt="">
-      <div class="m-qb" id="mQB"></div>
-    </div>
+    <div class="m-img-wrap"><img id="mImg" src="" alt=""></div>
     <div class="m-body">
       <div class="m-brand" id="mBrand"></div>
       <div class="m-name"  id="mName"></div>
@@ -244,256 +204,171 @@ footer{padding:1.5rem 1.2rem;flex-direction:column;align-items:flex-start}
   </div>
 </div>
 
-<div class="upd-toast" id="updToast">
-  <span id="updMsg">New products available!</span>
-  <button onclick="applyRefresh()">Refresh</button>
-  <button onclick="this.parentElement.classList.remove('show')" style="background:none;color:var(--muted);border:none;cursor:pointer;padding:0 4px">✕</button>
-</div>
-
 <footer>
   <div class="ft-logo">NOVA <span>BRANDLY</span></div>
   <p id="footTxt">Nova Brandly · Order via @nataljakorr</p>
 </footer>
 
 <script>
-const W = 'https://hidden-smoke-0ae0.natali-korabljov.workers.dev';
+// ── Quality tier helper ──────────────────────────────────────
+function qTier(q){ if(!q)return ''; if(q.startsWith('TQ'))return 'TQ'; if(q.startsWith('3A'))return '3A'; return q; }
 
-// Quality tier mapping (TQ2, TQ3 are sub-tiers of TQ)
-function qTier(q) {
-  if (!q) return '';
-  if (q.startsWith('TQ')) return 'TQ';
-  if (q.startsWith('3A')) return '3A';
-  if (q.startsWith('OQ')) return 'OQ';
-  return q;
-}
+let ALL=[], filtered=[], page=0;
+const BATCH=60;
+let selQ='all', selCats=[], selBrands=[];
 
-function qBadgeClass(q) {
-  const t = qTier(q);
-  if (t === 'TQ') return 'qb-TQ';
-  if (t === '3A') return 'qb-3A';
-  if (t === 'OQ') return 'qb-OQ';
-  return '';
-}
-
-let ALL = [], filtered = [], page = 0, lastCount = 0;
-const BATCH = 60;
-let selQ = 'all', selCats = [], selBrands = [];
-
-// ── Load catalog ────────────────────────────────────────────
-function loadCatalog(force) {
-  fetch(W + (force ? '?action=refreshsupplier' : '?action=supplier'))
-    .then(r => r.json())
+// ── Load products.json (static file, no limits!) ─────────────
+function loadCatalog(){
+  // Add cache-busting so updates are always fresh
+  fetch('./products.json?v=' + Date.now())
+    .then(r => { if(!r.ok) throw new Error('Not found'); return r.json(); })
     .then(prods => {
-      if (!prods || !prods.length) return;
-      // Deduplicate by id
-      const seen = new Set();
-      ALL = prods.filter(p => { if(seen.has(p.i)) return false; seen.add(p.i); return true; });
-
-      if (ALL.length > lastCount && lastCount > 0) {
-        document.getElementById('updMsg').textContent = (ALL.length-lastCount) + ' new products!';
-        document.getElementById('updToast').classList.add('show');
-      } else {
-        rebuildFilters();
-        render();
-      }
-      lastCount = ALL.length;
+      const seen=new Set();
+      ALL = prods.filter(p=>{ if(seen.has(p.i))return false; seen.add(p.i); return true; });
       document.getElementById('loadMsg').classList.add('hide');
-
-      // Stats
-      const brands = [...new Set(ALL.map(p=>p.b).filter(Boolean))];
-      const cats   = [...new Set(ALL.map(p=>p.c).filter(Boolean))];
-      document.getElementById('statTotal').textContent  = ALL.length + '+';
-      document.getElementById('statBrands').textContent = brands.length + '+';
+      const brands=[...new Set(ALL.map(p=>p.b).filter(Boolean))];
+      const cats  =[...new Set(ALL.map(p=>p.c).filter(Boolean))];
+      document.getElementById('statTotal').textContent  = ALL.length+'+';
+      document.getElementById('statBrands').textContent = brands.length+'+';
       document.getElementById('statCats').textContent   = cats.length;
-      document.getElementById('footTxt').textContent    = ALL.length + ' products · Order via @nataljakorr';
+      document.getElementById('footTxt').textContent    = ALL.length+' products · @nataljakorr';
+      buildDD('catPanel','catOpts',  cats,   selCats,   s=>{selCats=s;   updateBtn('catBtn',s);   render();});
+      buildDD('brandPanel','brandOpts',brands,selBrands,s=>{selBrands=s; updateBtn('brandBtn',s); render();});
+      render();
     })
-    .catch(() => {
-      document.getElementById('loadMsg').textContent = 'Error loading — check if Worker is deployed.';
+    .catch(()=>{
+      document.getElementById('loadMsg').textContent='Catalog not found — see setup instructions.';
     });
 }
 
-function applyRefresh() {
-  rebuildFilters(); render();
-  document.getElementById('updToast').classList.remove('show');
+// ── Quality filter ───────────────────────────────────────────
+function setQ(v){
+  selQ=v;
+  document.querySelectorAll('.qpill').forEach(p=>p.classList.toggle('on',p.getAttribute('data-q')===v));
+  render();
 }
 
-// ── Rebuild filter dropdowns ────────────────────────────────
-function rebuildFilters() {
-  const cats   = [...new Set(ALL.map(p=>p.c).filter(Boolean))].sort();
-  const brands = [...new Set(ALL.map(p=>p.b).filter(Boolean))].sort();
-  buildDD('catPanel','catOpts', cats,   selCats,   s=>{selCats=s;   updateBtn('catBtn',s);   render();});
-  buildDD('brandPanel','brandOpts', brands, selBrands, s=>{selBrands=s; updateBtn('brandBtn',s); render();});
-}
-
-function buildDD(panelId, optsId, items, selArr, onChange) {
-  const panel = document.getElementById(panelId);
-  const opts  = document.getElementById(optsId);
-  const srch  = panel.querySelector('.dd-srch');
-  const foot  = panel.querySelector('.dd-foot');
-  function ro(q) {
-    opts.innerHTML = '';
-    (q ? items.filter(x=>x.toLowerCase().includes(q.toLowerCase())) : items).forEach(item => {
-      const d = document.createElement('div');
-      d.className = 'dd-opt' + (selArr.includes(item)?' sel':'');
-      d.innerHTML = '<div class="dd-chk">'+(selArr.includes(item)?'✓':'')+'</div><span>'+item+'</span>';
-      d.addEventListener('click', e => {
+// ── Dropdown builder ─────────────────────────────────────────
+function buildDD(panelId,optsId,items,selArr,onChange){
+  const panel=document.getElementById(panelId);
+  const opts=document.getElementById(optsId);
+  const srch=panel.querySelector('.dd-srch');
+  const foot=panel.querySelector('.dd-foot');
+  function ro(q){
+    opts.innerHTML='';
+    (q?items.filter(x=>x.toLowerCase().includes(q.toLowerCase())):items).forEach(item=>{
+      const d=document.createElement('div');
+      d.className='dd-opt'+(selArr.includes(item)?' sel':'');
+      d.innerHTML='<div class="dd-chk">'+(selArr.includes(item)?'✓':'')+'</div><span>'+item+'</span>';
+      d.addEventListener('click',e=>{
         e.stopPropagation();
-        const i = selArr.indexOf(item);
-        if(i>=0) selArr.splice(i,1); else selArr.push(item);
-        onChange([...selArr]); ro(srch.value);
+        const i=selArr.indexOf(item);if(i>=0)selArr.splice(i,1);else selArr.push(item);
+        onChange([...selArr]);ro(srch.value);
       });
       opts.appendChild(d);
     });
   }
-  srch.oninput = ()=>ro(srch.value);
-  srch.onclick = e=>e.stopPropagation();
-  foot.onclick = e=>{e.stopPropagation();selArr.splice(0);onChange([]);ro('');};
+  srch.oninput=()=>ro(srch.value);
+  srch.onclick=e=>e.stopPropagation();
+  foot.onclick=e=>{e.stopPropagation();selArr.splice(0);onChange([]);ro('');};
   ro('');
 }
-
-function updateBtn(btnId, sel) {
-  const btn = document.getElementById(btnId);
-  const lbl = btn.querySelector('.dd-lbl');
-  if (!sel.length) { lbl.textContent='All'; btn.classList.remove('sel'); }
-  else if (sel.length===1) { lbl.textContent=sel[0]; btn.classList.add('sel'); }
-  else { lbl.textContent=sel.length+' selected'; btn.classList.add('sel'); }
+function updateBtn(btnId,sel){
+  const btn=document.getElementById(btnId);
+  const lbl=btn.querySelector('.dd-lbl');
+  if(!sel.length){lbl.textContent='All';btn.classList.remove('sel');}
+  else if(sel.length===1){lbl.textContent=sel[0];btn.classList.add('sel');}
+  else{lbl.textContent=sel.length+' selected';btn.classList.add('sel');}
 }
-
-// Close dropdowns on outside click
-document.addEventListener('click', ()=>{
+document.addEventListener('click',()=>{
   document.querySelectorAll('.dd-panel').forEach(p=>p.classList.remove('open'));
   document.querySelectorAll('.dd-btn').forEach(b=>b.classList.remove('open'));
 });
 document.querySelectorAll('.dd-btn').forEach(btn=>{
-  btn.addEventListener('click', e=>{
+  btn.addEventListener('click',e=>{
     e.stopPropagation();
-    const pid = btn.id.replace('Btn','Panel');
-    const panel = document.getElementById(pid);
-    const was = panel.classList.contains('open');
+    const pid=btn.id.replace('Btn','Panel');
+    const panel=document.getElementById(pid);
+    const was=panel.classList.contains('open');
     document.querySelectorAll('.dd-panel').forEach(p=>p.classList.remove('open'));
     document.querySelectorAll('.dd-btn').forEach(b=>b.classList.remove('open'));
-    if (!was) { panel.classList.add('open'); btn.classList.add('open'); panel.querySelector('.dd-srch').focus(); }
+    if(!was){panel.classList.add('open');btn.classList.add('open');panel.querySelector('.dd-srch').focus();}
   });
 });
 
-// ── Quality filter ──────────────────────────────────────────
-function setQ(v) {
-  selQ = v;
-  document.querySelectorAll('.qpill').forEach(p=>p.classList.toggle('on', p.getAttribute('data-q')===v));
-  render();
-}
-
-// ── Render ──────────────────────────────────────────────────
-function render() {
-  const q   = document.getElementById('srch').value.toLowerCase().trim();
-  const srt = document.getElementById('srt').value;
-
-  filtered = ALL.filter(p => {
-    // Quality filter: match by tier prefix
-    if (selQ !== 'all' && qTier(p.q) !== selQ) return false;
-    if (selCats.length   && !selCats.includes(p.c))   return false;
-    if (selBrands.length && !selBrands.includes(p.b)) return false;
-    if (q) {
-      const s = (p.n+' '+p.b+' '+p.c+' '+(p.d||'')).toLowerCase();
-      if (!s.includes(q)) return false;
-    }
+// ── Render ───────────────────────────────────────────────────
+function render(){
+  const q=document.getElementById('srch').value.toLowerCase().trim();
+  const srt=document.getElementById('srt').value;
+  filtered=ALL.filter(p=>{
+    if(selQ!=='all'&&qTier(p.q)!==selQ)return false;
+    if(selCats.length&&!selCats.includes(p.c))return false;
+    if(selBrands.length&&!selBrands.includes(p.b))return false;
+    if(q&&!(p.n+' '+p.b+' '+p.c+' '+(p.d||'')).toLowerCase().includes(q))return false;
     return true;
   });
-
-  if (srt==='asc')  filtered.sort((a,b)=>a.p-b.p);
-  if (srt==='desc') filtered.sort((a,b)=>b.p-a.p);
-  if (srt==='az')   filtered.sort((a,b)=>a.n.localeCompare(b.n));
-
-  page = 0;
-  document.getElementById('grid').innerHTML = '';
-  document.getElementById('cnt').textContent = filtered.length;
-  document.getElementById('nores').classList.toggle('show', filtered.length===0 && ALL.length>0);
+  if(srt==='asc') filtered.sort((a,b)=>a.p-b.p);
+  if(srt==='desc')filtered.sort((a,b)=>b.p-a.p);
+  if(srt==='az')  filtered.sort((a,b)=>a.n.localeCompare(b.n));
+  page=0;
+  document.getElementById('grid').innerHTML='';
+  document.getElementById('cnt').textContent=filtered.length;
+  document.getElementById('nores').classList.toggle('show',filtered.length===0&&ALL.length>0);
   loadMore();
 }
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-function priceDisplay(p) {
-  // Show as: quality_code + calculated_price  e.g. "TQ284"
-  return '<span class="qc">' + esc(p.q||'') + '</span>' + p.p;
-}
-
-function makeCard(p, delay) {
-  const card = document.createElement('div');
-  card.className = 'card';
-  card.style.animationDelay = delay + 's';
-
-  const iw = document.createElement('div'); iw.className = 'card-img';
-  // Skeleton
-  const sk = document.createElement('div'); sk.className = 'img-sk';
-  const sid = 'sk_' + p.i.replace(/[^a-z0-9]/gi,'_').slice(-14);
-  sk.id = sid; iw.appendChild(sk);
-  // Image
-  const img = document.createElement('img');
-  img.src = p.img; img.alt = p.n; img.loading = 'lazy';
-  img.onload = img.onerror = ()=>{ const e=document.getElementById(sid); if(e)e.remove(); };
+function makeCard(p,delay){
+  const card=document.createElement('div');card.className='card';card.style.animationDelay=delay+'s';
+  const iw=document.createElement('div');iw.className='card-img';
+  const sk=document.createElement('div');sk.className='img-sk';
+  const sid='sk_'+String(p.i).replace(/[^a-z0-9]/gi,'_').slice(-12);
+  sk.id=sid;iw.appendChild(sk);
+  const img=document.createElement('img');img.src=p.img;img.alt=p.n;img.loading='lazy';
+  img.onload=img.onerror=()=>{const e=document.getElementById(sid);if(e)e.remove();};
   iw.appendChild(img);
-  // Quality badge
-  if (p.q) {
-    const qb = document.createElement('div');
-    qb.className = 'qbadge ' + qBadgeClass(p.q);
-    qb.textContent = p.q; iw.appendChild(qb);
-  }
-  // Hover overlay
-  const ov = document.createElement('div'); ov.className = 'card-ov';
-  const ob = document.createElement('button'); ob.className = 'ov-btn'; ob.textContent = 'View Details';
-  ov.appendChild(ob); iw.appendChild(ov); card.appendChild(iw);
-
-  // Body
-  const bd = document.createElement('div'); bd.className = 'card-body';
-  bd.innerHTML =
-    '<div class="card-top"><span class="card-brand">'+esc(p.b)+'</span><span class="card-cat">'+esc(p.c)+'</span></div>' +
-    '<div class="card-name">'+esc(p.n)+'</div>' +
-    '<div class="card-desc">'+esc(p.d||'')+'</div>' +
-    '<div class="card-price">'+priceDisplay(p)+'</div>';
+  if(p.q){const qb=document.createElement('div');qb.className='qbadge';qb.textContent=p.q;iw.appendChild(qb);}
+  const ov=document.createElement('div');ov.className='card-ov';
+  const ob=document.createElement('button');ob.className='ov-btn';ob.textContent='View Details';ov.appendChild(ob);iw.appendChild(ov);
+  card.appendChild(iw);
+  const bd=document.createElement('div');bd.className='card-body';
+  bd.innerHTML='<div class="card-top"><span class="card-brand">'+esc(p.b)+'</span><span class="card-cat">'+esc(p.c)+'</span></div>'
+    +'<div class="card-name">'+esc(p.n)+'</div>'
+    +'<div class="card-desc">'+esc(p.d||'')+'</div>'
+    +'<div class="card-price"><span class="qc">'+esc(p.q||'')+'</span>'+p.p+'</div>';
   card.appendChild(bd);
-  card.addEventListener('click', (pp=>()=>openM(pp))(p));
+  card.addEventListener('click',(pp=>()=>openM(pp))(p));
   return card;
 }
-
-function loadMore() {
-  const s=page*BATCH, e=Math.min(s+BATCH, filtered.length);
-  if (s>=filtered.length) return;
-  const frag=document.createDocumentFragment();
-  for (let i=s; i<e; i++) frag.appendChild(makeCard(filtered[i], (i-s)*0.016));
-  document.getElementById('grid').appendChild(frag);
-  page++;
+function loadMore(){
+  const s=page*BATCH,e=Math.min(s+BATCH,filtered.length);
+  if(s>=filtered.length)return;
+  const f=document.createDocumentFragment();
+  for(let i=s;i<e;i++)f.appendChild(makeCard(filtered[i],(i-s)*0.016));
+  document.getElementById('grid').appendChild(f);page++;
 }
+new IntersectionObserver(es=>{if(es[0].isIntersecting&&page*BATCH<filtered.length)loadMore();},{rootMargin:'500px'})
+  .observe(document.getElementById('sentinel'));
 
-new IntersectionObserver(es=>{
-  if (es[0].isIntersecting && page*BATCH<filtered.length) loadMore();
-},{rootMargin:'500px'}).observe(document.getElementById('sentinel'));
-
-// ── Modal ───────────────────────────────────────────────────
-function openM(p) {
-  document.getElementById('mImg').src    = p.img;
-  document.getElementById('mBrand').textContent = p.b || '';
-  document.getElementById('mName').textContent  = p.n || '';
-  document.getElementById('mPrice').innerHTML   = priceDisplay(p);
-  document.getElementById('mDesc').textContent  = p.d || '';
-  const qb = document.getElementById('mQB');
-  qb.textContent = p.q || '';
-  qb.className = 'm-qb ' + qBadgeClass(p.q);
-  document.getElementById('mTags').innerHTML =
-    '<span class="m-tag">'+esc(p.c)+'</span><span class="m-tag">'+esc(p.b)+'</span>' +
-    (p.q ? '<span class="m-tag">'+esc(p.q)+'</span>' : '');
+// ── Modal ────────────────────────────────────────────────────
+function openM(p){
+  document.getElementById('mImg').src=p.img;
+  document.getElementById('mBrand').textContent=p.b||'';
+  document.getElementById('mName').textContent=p.n||'';
+  document.getElementById('mPrice').innerHTML='<span class="qc">'+esc(p.q||'')+'</span>'+p.p;
+  document.getElementById('mDesc').textContent=p.d||'';
+  document.getElementById('mTags').innerHTML='<span class="m-tag">'+esc(p.c)+'</span><span class="m-tag">'+esc(p.b)+'</span>'+(p.q?'<span class="m-tag">'+esc(p.q)+'</span>':'');
   document.getElementById('mbg').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow='hidden';
 }
-function closeBg(e){ if(e.target===document.getElementById('mbg')) closeM(); }
-function closeM(){ document.getElementById('mbg').classList.remove('open'); document.body.style.overflow=''; }
-document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeM(); });
+function closeBg(e){if(e.target===document.getElementById('mbg'))closeM();}
+function closeM(){document.getElementById('mbg').classList.remove('open');document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM();});
 
-// ── Boot ────────────────────────────────────────────────────
-window.addEventListener('load', ()=>{
-  setTimeout(()=>document.getElementById('loader').classList.add('gone'), 500);
-  loadCatalog(false);
-  setInterval(()=>loadCatalog(false), 30*60*1000); // refresh every 30 min
+// ── Boot ─────────────────────────────────────────────────────
+window.addEventListener('load',()=>{
+  setTimeout(()=>document.getElementById('loader').classList.add('gone'),500);
+  loadCatalog();
 });
 </script>
 </body>
