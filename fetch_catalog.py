@@ -125,15 +125,9 @@ def fetch_category(cat_id, cat_name, headers, seen, time_limit=CATEGORY_TIME_LIM
                 })
 
             print(f'    Page {page}: {len(items)} items, {new_count} new (total so far: {len(prods)})', flush=True)
-
-            # Detect stuck: 0 new items across pages = probably looping duplicates
-            if new_count == 0:
-                stuck_count += 1
-                if stuck_count >= MAX_STUCK_PAGES:
-                    print(f'    ⚠ {MAX_STUCK_PAGES} pages with 0 new items, stopping (likely duplicate loop)', flush=True)
-                    break
-            else:
-                stuck_count = 0
+            # Note: NOT stopping on 0-new-items streaks — the supplier API legitimately
+            # returns long runs of duplicate items between genuinely new ones.
+            # We rely on isLoadMore=false / pageTimestamp-stall / hard caps instead.
 
             pag = result.get('pagination', {})
             if not pag.get('isLoadMore', False):
