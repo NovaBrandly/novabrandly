@@ -81,6 +81,7 @@ header{position:sticky;top:0;z-index:200;background:rgba(11,11,11,.97);backdrop-
 .card:hover .card-ov{opacity:1}
 .ov-btn{background:var(--gold);color:#0b0b0b;border:none;padding:8px 0;font-family:'Jost',sans-serif;font-size:.65rem;font-weight:500;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;width:100%}
 .qbadge{position:absolute;top:8px;right:8px;font-size:.6rem;font-weight:600;letter-spacing:.1em;padding:3px 8px;z-index:2;background:#d4af37;color:#0b0b0b}
+.badge-new{position:absolute;top:8px;left:8px;font-size:.58rem;font-weight:600;letter-spacing:.12em;padding:3px 8px;z-index:2;background:var(--gold);color:#0b0b0b;text-transform:uppercase}
 .card-body{padding:.8rem .9rem .9rem;border-top:1px solid var(--border)}
 .card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.22rem}
 .card-brand{font-size:.58rem;letter-spacing:.17em;color:var(--gold);text-transform:uppercase;font-weight:500}
@@ -112,6 +113,10 @@ footer{border-top:1px solid var(--border);padding:2rem 2.5rem;display:flex;justi
 .ft-logo{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:1.1rem;letter-spacing:.4em;color:var(--gold);text-transform:uppercase}
 .ft-logo span{color:var(--text)}
 footer p{font-size:.68rem;color:var(--muted)}
+
+.new-banner{background:linear-gradient(90deg,rgba(200,169,110,.12),rgba(200,169,110,.04));border-bottom:1px solid rgba(200,169,110,.25);padding:.6rem 2.5rem;display:none;align-items:center;gap:10px;font-size:.72rem;color:var(--gold2)}
+.new-banner.show{display:flex}
+
 @media(max-width:768px){
 header{padding:0 1.2rem;gap:.8rem;height:60px}
 .cnt-lbl{display:none}
@@ -139,6 +144,7 @@ footer{padding:1.5rem 1.2rem;flex-direction:column;align-items:flex-start}
   </div>
 </header>
 
+<div class="new-banner" id="newBanner">✨ <b id="newCount">0</b> new products added recently — showing at the top!</div>
 <section class="hero">
   <div class="hero-sub">Nova Brandly · Premium Supplier Catalog</div>
   <h1>Luxury Fashion — <em>Best Quality</em></h1>
@@ -172,7 +178,7 @@ footer{padding:1.5rem 1.2rem;flex-direction:column;align-items:flex-start}
   </div>
   <div class="fgroup"><span class="flbl">Sort</span>
     <select class="srtsel" id="srt" onchange="render()">
-      <option value="def">Default</option>
+      <option value="def">Default (newest first)</option>
       <option value="asc">Price: Low → High</option>
       <option value="desc">Price: High → Low</option>
       <option value="az">Name A–Z</option>
@@ -232,6 +238,14 @@ function loadCatalog(){
       document.getElementById('statBrands').textContent = brands.length+'+';
       document.getElementById('statCats').textContent   = cats.length;
       document.getElementById('footTxt').textContent    = ALL.length+' products · @nataljakorr';
+
+      // Show "new arrivals" banner if there are recent items
+      const nowTs2 = Math.floor(Date.now()/1000);
+      const newCount = ALL.filter(p=>p.ts && (nowTs2-p.ts) < 24*3600).length;
+      if(newCount > 0){
+        document.getElementById('newCount').textContent = newCount;
+        document.getElementById('newBanner').classList.add('show');
+      }
       buildDD('catPanel','catOpts',  cats,   selCats,   s=>{selCats=s;   updateBtn('catBtn',s);   render();});
       buildDD('brandPanel','brandOpts',brands,selBrands,s=>{selBrands=s; updateBtn('brandBtn',s); render();});
       render();
@@ -318,6 +332,9 @@ function render(){
 }
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
+const DAY_SECONDS = 24*3600;
+const nowTs = Math.floor(Date.now()/1000);
+
 function makeCard(p,delay){
   const card=document.createElement('div');card.className='card';card.style.animationDelay=delay+'s';
   const iw=document.createElement('div');iw.className='card-img';
@@ -327,6 +344,9 @@ function makeCard(p,delay){
   const img=document.createElement('img');img.src=p.img;img.alt=p.n;img.loading='lazy';
   img.onload=img.onerror=()=>{const e=document.getElementById(sid);if(e)e.remove();};
   iw.appendChild(img);
+  if(p.ts && (nowTs - p.ts) < DAY_SECONDS){
+    const nb=document.createElement('div');nb.className='badge-new';nb.textContent='NEW';iw.appendChild(nb);
+  }
   if(p.q){const qb=document.createElement('div');qb.className='qbadge';qb.textContent=p.q;iw.appendChild(qb);}
   const ov=document.createElement('div');ov.className='card-ov';
   const ob=document.createElement('button');ob.className='ov-btn';ob.textContent='View Details';ov.appendChild(ob);iw.appendChild(ov);
