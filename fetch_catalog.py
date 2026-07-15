@@ -66,21 +66,37 @@ def fetch_page(cat_id, ts, headers):
     with urllib.request.urlopen(req, timeout=30) as resp:
         return json.loads(resp.read().decode())
 
+MAX_PAGES_PER_CAT = 60      # hard safety cap
+MAX_STUCK_PAGES   = 3       # if pageTimestamp repeats or 0 new items N times in a row, stop
+CATEGORY_TIME_LIMIT = 90    # seconds max per category
+
 def fetch_category(cat_id, cat_name, headers, seen):
     prods, ts, page = [], '', 0
+    stuck_count = 0
+    last_ts = None
+    start_time = time.time()
     print(f'  Fetching {cat_name} ({cat_id})...', flush=True)
-    while True:
+
+    while page < MAX_PAGES_PER_CAT:
+        # Hard time limit per category
+        if time.time() - start_time > CATEGORY_TIME_LIMIT:
+            print(f'    ⏱ Time limit reached for {cat_name}, moving on', flush=True)
+            break
         try:
             data = fetch_page(cat_id, ts, headers)
             result = data.get('result', {})
             items = result.get('items', [])
             if not items:
+                print(f'    Page {page}: no items, stopping', flush=True)
                 break
+
+            new_count = 0
             for item in items:
                 gid = item.get('goods_id', '')
                 if gid in seen:
                     continue
                 seen.add(gid)
+                new_count += 1
                 lines = [l.strip() for l in item.get('title','').split('\n') if l.strip()]
                 if not lines:
                     continue
@@ -106,16 +122,37 @@ def fetch_category(cat_id, cat_name, headers, seen):
                     'img': imgs[0],
                     'src': 'sup',
                 })
+
+            print(f'    Page {page}: {len(items)} items, {new_count} new (total so far: {len(prods)})', flush=True)
+
+            # Detect stuck: 0 new items across pages = probably looping duplicates
+            if new_count == 0:
+                stuck_count += 1
+                if stuck_count >= MAX_STUCK_PAGES:
+                    print(f'    ⚠ {MAX_STUCK_PAGES} pages with 0 new items, stopping (likely duplicate loop)', flush=True)
+                    break
+            else:
+                stuck_count = 0
+
             pag = result.get('pagination', {})
             if not pag.get('isLoadMore', False):
+                print(f'    isLoadMore=false, stopping normally', flush=True)
                 break
-            ts = pag['pageTimestamp']
+
+            new_ts = pag.get('pageTimestamp')
+            # Detect stuck: pageTimestamp not advancing
+            if new_ts == last_ts:
+                print(f'    ⚠ pageTimestamp not advancing, stopping', flush=True)
+                break
+            last_ts = new_ts
+            ts = new_ts
             page += 1
-            time.sleep(0.08)
+            time.sleep(0.1)
         except Exception as e:
             print(f'    Error on page {page}: {e}', flush=True)
             break
-    print(f'    → {len(prods)} products', flush=True)
+
+    print(f'    → {cat_name}: {len(prods)} products in {page+1} pages, {time.time()-start_time:.1f}s', flush=True)
     return prods
 
 def main():
