@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """
-Nova Brandly — Supplier Catalog Fetcher (v2)
-Run by GitHub Actions every 6 hours.
+Nova Brandly — Catalog Fetcher (v3, definitive)
 
-Delegates the actual supplier fetching to a Cloudflare Worker (which the
-supplier's anti-bot system trusts), and just collects + saves the results.
-This avoids GitHub Actions' datacenter IPs being blocked/degraded by the
-supplier, while still writing nothing to Cloudflare KV (no write limits).
+- Calls the Cloudflare Worker's fetchcat endpoint. The Worker internally
+  repeat-samples each category and returns an accumulated batch of unique
+  products (supplier gives a rotating ~30 sample per call; the Worker loops).
+- We call each category a few ROUNDS and MERGE everything into products.json.
+- MERGE-NEVER-SHRINK: existing products are always kept; we only add. A bad
+  run can never wipe the catalog. Over successive 6-hourly runs it converges
+  to the supplier's full inventory and keeps picking up new arrivals.
 """
 
 import json, os, sys, time
@@ -15,99 +17,99 @@ import urllib.request, urllib.parse
 WORKER_URL = 'https://hidden-smoke-0ae0.natali-korabljov.workers.dev'
 
 CATS = [
-    ('84646720', 'Bags'),
-    ('84646717', 'Bags'),
-    ('84646715', 'Bags'),
-    ('84678648', 'Wallets'),
-    ('84678702', 'Shoes'),
-    ('84678506', 'Clothing'),
-    ('84678726', 'Belts'),
-    ('84678751', 'Jewelry'),
-    ('84678809', 'Scarves & Hats'),
+    ('84646720', 'Bags'), ('84646717', 'Bags'), ('84646715', 'Bags'),
+    ('84678648', 'Wallets'), ('84678702', 'Shoes'), ('84678506', 'Clothing'),
+    ('84678726', 'Belts'), ('84678751', 'Jewelry'), ('84678809', 'Scarves & Hats'),
 ]
 
-def fetch_category_via_worker(cat_id, cat_name, retries=2):
+ROUNDS_PER_CAT     = 4     # Worker already accumulates internally; a few rounds catch the rest
+STOP_AFTER_NO_NEW  = 2     # stop a category early after N rounds with 0 new
+GLOBAL_TIME_BUDGET = 1200  # 20 min (workflow allows 25)
+
+
+def worker_fetchcat(cat_id, cat_name):
     url = f'{WORKER_URL}/?action=fetchcat&catId={cat_id}&catName={urllib.parse.quote(cat_name)}'
-    for attempt in range(retries):
-        try:
-            req = urllib.request.Request(url, method='GET')
-            with urllib.request.urlopen(req, timeout=180) as resp:  # Worker may take a while
-                data = json.loads(resp.read().decode())
-            if isinstance(data, dict) and data.get('error'):
-                print(f'    Worker error: {data["error"]}', flush=True)
-                return []
-            return data if isinstance(data, list) else []
-        except Exception as e:
-            print(f'    Attempt {attempt+1} failed: {e}', flush=True)
-            time.sleep(3)
-    return []
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, method='GET'), timeout=120) as resp:
+            data = json.loads(resp.read().decode())
+        if isinstance(data, dict) and data.get('error'):
+            print(f'    Worker: {data["error"]}', flush=True)
+            return None  # signal error (e.g. token expired)
+        return data if isinstance(data, list) else []
+    except Exception as e:
+        print(f'    Call failed: {e}', flush=True)
+        return []
+
 
 def load_existing():
     try:
         with open('products.json', 'r', encoding='utf-8') as f:
-            existing = json.load(f)
-        return {p['i']: p.get('ts', 0) for p in existing}
+            data = json.load(f)
+        if isinstance(data, list):
+            return data
     except Exception:
-        return {}
+        pass
+    return []
+
 
 def main():
-    existing_ts = load_existing()
+    existing = load_existing()
+    catalog = {p['i']: p for p in existing if isinstance(p, dict) and p.get('i')}
+    start_count = len(catalog)
     now = int(time.time())
+    print(f'Existing catalog: {start_count} products', flush=True)
 
-    print('Starting catalog fetch via Cloudflare Worker...', flush=True)
-    all_products = []
-    seen = set()
     run_start = time.time()
+    token_dead = False
 
     for cat_id, cat_name in CATS:
-        print(f'  Fetching {cat_name} ({cat_id})...', flush=True)
-        t0 = time.time()
-        prods = fetch_category_via_worker(cat_id, cat_name)
-        new_prods = []
-        for p in prods:
-            if p['i'] not in seen:
-                seen.add(p['i'])
-                new_prods.append(p)
-        all_products.extend(new_prods)
-        print(f'    → {len(new_prods)} products in {time.time()-t0:.1f}s (total: {len(all_products)})', flush=True)
-
-    print(f'\nTotal: {len(all_products)} products in {time.time()-run_start:.1f}s', flush=True)
-
-    # Assign timestamps: keep original first-seen time for existing items,
-    # use "now" for genuinely new items — so new arrivals sort to top
-    new_count = 0
-    for p in all_products:
-        try:
-            pid = p.get('i')
-            if pid and pid in existing_ts:
-                p['ts'] = existing_ts[pid]
+        if token_dead or time.time() - run_start > GLOBAL_TIME_BUDGET:
+            break
+        print(f'  {cat_name} ({cat_id})...', flush=True)
+        no_new = 0
+        for rnd in range(ROUNDS_PER_CAT):
+            if time.time() - run_start > GLOBAL_TIME_BUDGET:
+                break
+            batch = worker_fetchcat(cat_id, cat_name)
+            if batch is None:
+                token_dead = True
+                print('    Token appears expired — stopping fetch, keeping existing catalog', flush=True)
+                break
+            new = 0
+            for p in batch:
+                pid = p.get('i')
+                if pid and pid not in catalog:
+                    p['ts'] = now
+                    catalog[pid] = p
+                    new += 1
+            print(f'    Round {rnd+1}: {len(batch)} returned, {new} new (catalog: {len(catalog)})', flush=True)
+            if new == 0:
+                if (no_new := no_new + 1) >= STOP_AFTER_NO_NEW:
+                    break
             else:
-                p['ts'] = now
-                new_count += 1
-        except Exception:
-            p['ts'] = now
+                no_new = 0
+            time.sleep(0.5)
 
-    try:
-        all_products.sort(key=lambda p: p.get('ts', 0), reverse=True)
-    except Exception as e:
-        print(f'Warning: sort failed ({e})', flush=True)
+    final = list(catalog.values())
+    final.sort(key=lambda p: p.get('ts', 0), reverse=True)  # newest first
+    print(f'\nCatalog: {start_count} → {len(final)} (+{len(final)-start_count})', flush=True)
 
-    print(f'New items this run: {new_count}', flush=True)
+    # SAFETY: never write fewer than we started with
+    if len(final) < start_count:
+        print('⚠ Result smaller than existing — keeping existing file', flush=True)
+        return
 
-    try:
-        with open('products.json', 'w', encoding='utf-8') as f:
-            json.dump(all_products, f, ensure_ascii=False, separators=(',',':'))
-        print('Saved products.json ✅', flush=True)
-    except Exception as e:
-        print(f'❌ Failed to save products.json: {e}', flush=True)
-        raise
+    with open('products.json', 'w', encoding='utf-8') as f:
+        json.dump(final, f, ensure_ascii=False, separators=(',', ':'))
+    print('Saved products.json ✅', flush=True)
+
 
 if __name__ == '__main__':
     try:
         main()
     except Exception as e:
         import traceback
-        print(f'\n❌ FATAL ERROR: {type(e).__name__}: {e}', flush=True)
+        print(f'\n❌ FATAL: {type(e).__name__}: {e}', flush=True)
         traceback.print_exc()
         if not os.path.exists('products.json'):
             with open('products.json', 'w', encoding='utf-8') as f:
