@@ -383,7 +383,7 @@ function makeCard(p,delay){
     +'<div class="card-name">'+esc(p.n)+'</div>'
     +'<div class="card-desc">'+esc(p.d||'')+'</div>'
     +'<div class="card-price"><span class="qc">'+esc(p.q||'')+'</span>'+p.p+'</div>'
-    +(p.ref?'<div class="ref-code">Ref: '+esc(p.ref)+'</div>':'');
+    ;
   card.appendChild(bd);
   card.addEventListener('click',(pp=>()=>openM(pp))(p));
   return card;
@@ -404,8 +404,8 @@ function openM(p){
   document.getElementById('mBrand').textContent=p.b||'';
   document.getElementById('mName').textContent=p.n||'';
   document.getElementById('mPrice').innerHTML='<span class="qc">'+esc(p.q||'')+'</span>'+p.p;
-  document.getElementById('mDesc').textContent=(p.d||'')+(p.ref?'\n\nReference: '+p.ref:'');
-  document.getElementById('mTags').innerHTML='<span class="m-tag">'+esc(p.c)+'</span><span class="m-tag">'+esc(p.b)+'</span>'+(p.q?'<span class="m-tag">'+esc(p.q)+'</span>':'')+(p.ref?'<span class="m-tag">'+esc(p.ref)+'</span>':'');
+  document.getElementById('mDesc').textContent=p.d||'';
+  document.getElementById('mTags').innerHTML='<span class="m-tag">'+esc(p.c)+'</span><span class="m-tag">'+esc(p.b)+'</span>'+(p.q?'<span class="m-tag">'+esc(p.q)+'</span>':'');
 
   const gal=document.getElementById('mGallery');
   const imgs=(p.imgs&&p.imgs.length>1)?p.imgs:null;
