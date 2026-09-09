@@ -1,0 +1,42 @@
+name: Update Supplier 2 (Telegram)
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Telethon
+        run: pip install telethon
+
+      - name: Fetch new Telegram products
+        env:
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          TG_SESSION: ${{ secrets.TG_SESSION }}
+        run: python3 fetch_telegram2.py
+
+      - name: Commit and push changes
+        run: |
+          git config user.name  "Nova Brandly Bot"
+          git config user.email "bot@novabrandly.com"
+          git add products.json supplier2_images/ supplier2_state.json
+          git diff --staged --quiet || git commit -m "Supplier 2 update $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push
