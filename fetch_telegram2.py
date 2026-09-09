@@ -10,7 +10,7 @@ into products.json (merge-never-shrink — never deletes existing items).
 Requires GitHub Secrets: TG_API_ID, TG_API_HASH, TG_SESSION
 """
 
-import json, os, re, sys, asyncio
+import json, os, re, sys, asyncio, time
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 
@@ -163,6 +163,9 @@ async def main():
                 continue
 
         name = f"{parsed['brand']} {parsed['category']}".strip()
+        # Preserve original first-seen timestamp if this item already existed;
+        # otherwise it's genuinely new -> "now" so it shows the NEW badge and sorts to top
+        existing_ts = catalog.get(pid, {}).get('ts')
         catalog[pid] = {
             'i': pid,
             'n': name,
@@ -173,6 +176,7 @@ async def main():
             'd': parsed['desc'],
             'img': f"./{img_path}",
             'src': 'tg2',
+            'ts': existing_ts if existing_ts else int(time.time()),
         }
         new_count += 1
         print(f'  + {item_code}: {name} (${parsed["price"]})', flush=True)
@@ -185,6 +189,11 @@ async def main():
     if len(final) < start_count:
         print('Would shrink catalog — aborting save.', flush=True)
         return
+
+    try:
+        final.sort(key=lambda p: p.get('ts', 0), reverse=True)
+    except Exception as e:
+        print(f'Warning: sort failed ({e})', flush=True)
 
     save_json('products.json', final)
     save_json(STATE_FILE, {'last_id': max_id_seen})
