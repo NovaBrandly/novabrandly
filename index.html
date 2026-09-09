@@ -265,7 +265,7 @@ function loadCatalog(){
 
       // Show "new arrivals" banner if there are recent items
       const nowTs2 = Math.floor(Date.now()/1000);
-      const newCount = ALL.filter(p=>p.ts && (nowTs2-p.ts) < 24*3600).length;
+      const newCount = ALL.filter(p=>p.ts && (nowTs2-p.ts) < 5*24*3600).length;
       if(newCount > 0){
         document.getElementById('newCount').textContent = newCount;
         document.getElementById('newBanner').classList.add('show');
@@ -356,7 +356,7 @@ function render(){
 }
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-const DAY_SECONDS = 24*3600;
+const NEW_WINDOW_SECONDS = 5*24*3600;
 const nowTs = Math.floor(Date.now()/1000);
 
 function makeCard(p,delay){
@@ -368,7 +368,7 @@ function makeCard(p,delay){
   const img=document.createElement('img');img.src=p.img;img.alt=p.n;img.loading='lazy';
   img.onload=img.onerror=()=>{const e=document.getElementById(sid);if(e)e.remove();};
   iw.appendChild(img);
-  if(p.ts && (nowTs - p.ts) < DAY_SECONDS){
+  if(p.ts && (nowTs - p.ts) < NEW_WINDOW_SECONDS){
     const nb=document.createElement('div');nb.className='badge-new';nb.textContent='NEW';iw.appendChild(nb);
   }
   if(p.q){const qb=document.createElement('div');qb.className='qbadge';qb.textContent=p.q;iw.appendChild(qb);}
