@@ -34,7 +34,7 @@ jobs:
         run: python3 fetch_telegram2.py
 
       - name: Remove known bad items
-        run: python3 remove_bad_items.py
+        run: python3 fetch_telegram2.py
 
       - name: Backfill any missing timestamps
         run: python3 backfill_ts.py
