@@ -31,7 +31,7 @@ jobs:
           TG_API_ID: ${{ secrets.TG_API_ID }}
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_SESSION: ${{ secrets.TG_SESSION }}
-        run: python3 fetch_telegram2.py
+         run: python3 remove_bad_items.py
 
       - name: Backfill any missing timestamps
         run: python3 backfill_ts.py
