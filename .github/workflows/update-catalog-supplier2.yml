@@ -36,6 +36,9 @@ jobs:
       - name: Remove known bad items
         run: python3 remove_bad_items.py
 
+      - name: Fix scarves and hats pricing
+        run: python3 fix_scarves_price.py
+
       - name: Backfill any missing timestamps
         run: python3 backfill_ts.py
 
