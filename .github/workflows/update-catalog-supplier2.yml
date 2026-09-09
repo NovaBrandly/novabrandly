@@ -34,7 +34,7 @@ jobs:
         run: python3 fetch_telegram2.py
 
       - name: Backfill any missing timestamps
-        run: python3 backfill_ts.py
+        run: python3 fix_timestamps_once.py
 
       - name: Commit and push changes
         run: |
