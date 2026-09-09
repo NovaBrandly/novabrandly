@@ -39,6 +39,9 @@ jobs:
       - name: Fix scarves and hats pricing
         run: python3 fix_scarves_price.py
 
+      - name: Fix belts pricing
+        run: python3 fix_belts_price.py
+
       - name: Backfill any missing timestamps
         run: python3 backfill_ts.py
 
